@@ -3,6 +3,7 @@ const { Tour ,validate}=require('../models/tour');
 
 exports.getAllTours=(req,res)=>{
 
+  /**1. FILTERING**/
   const queryObj= { ...req.query };
   const excludedFields=['page','sort','limit','fields'];
 
@@ -10,6 +11,7 @@ exports.getAllTours=(req,res)=>{
     delete queryObj[el];
   });
   // console.log(queryObj);
+  /**2. ADVANCED FILTERING**/
 //{ difficulty: 'difficult', duration: { gte: '4' } }
   let queryStr=JSON.stringify(queryObj)
   queryStr=queryStr.replace(/\b(gte|gt|lte|lt)\b/g,match=>`$${match}`)
@@ -18,6 +20,7 @@ exports.getAllTours=(req,res)=>{
 
   let query=Tour.find(JSON.parse(queryStr));
 
+  /**3. SORTING**/
   if (req.query.sort){
     //Allow sorting by multiple parameters separated by comma
     const sortBy=req.query.sort.split(',').join(' ');
@@ -27,6 +30,28 @@ exports.getAllTours=(req,res)=>{
   }else{
     query=query.sort({createdAt:-1});
   }
+
+  /**4. FIELD LIMITING**/
+  if (req.query.fields){
+    const fields=req.query.fields.split(',').join(' ');
+      query=query.select(fields);
+  }else{
+    query=query.select('-__v');
+  }
+
+  /**4. PAGINATION**/
+  //page =2 && limit=10 1-10,page1, 11-20, page2,
+  const page=req.query.page *1||1;//convert to number
+  const limit=req.query.limit *1||100;
+  const skip=(page-1)*limit;
+
+  query=query.skip(skip).limit(limit)
+  // if (req.query.page){
+  //   Tour.countDocuments({},(err,numTours)=>{
+  //     if (err) return res.status(500).json({ status:"failed", message:err });
+  //     if (skip>=numTours)  return  new Error('error');
+  //   })
+  // }
   query.exec((err,tours)=>{
     if (err) return res.status(500).json({
       status:"failed",

@@ -8,7 +8,7 @@ mongoose.connect(process.env.MONGO_URI,{
   useFindAndModify:false,
   useCreateIndex:true
 },err=>{
-  if (err) return console.log('Could not connect to DB');
+  if (err) return console.log('Database connection failed');
   console.log('Database Connected Successfully');
 })
 
