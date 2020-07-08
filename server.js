@@ -1,6 +1,14 @@
-const app=require('./app')
 const mongoose=require('mongoose');
 require('dotenv').config();
+
+
+process.on('uncaughtException',err=>{
+  console.log('Uncaught Exception...📌');
+  console.log(err.name,err.message);
+    process.exit(1)
+
+})
+const app=require('./app')
 
 mongoose.connect(process.env.MONGO_URI,{
   useNewUrlParser:true,
@@ -8,11 +16,15 @@ mongoose.connect(process.env.MONGO_URI,{
   useFindAndModify:false,
   useCreateIndex:true
 },err=>{
-  if (err) return console.log('Database connection failed');
+  if (err) return console.log('Database connection failed',err);
   console.log('Database Connected Successfully');
 })
 
 const port=3000;
-app.listen(port,()=>{
+const server=app.listen(port,()=>{
   console.log(`Server is running in port ${port}...`);
 });
+
+
+
+

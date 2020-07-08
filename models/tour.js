@@ -1,15 +1,17 @@
 const mongoose=require('mongoose');
 const Joi=require('@hapi/joi');
 const slugify=require('slugify');
+const validator=require('validator');
 
 const tourSchema=new mongoose.Schema({
   name:{
     type:String,
     required:true,
-    minlength:3,
-    maxlength:30,
+    minlength:[10],
+    maxlength:[40,'A tour name must not exceed 40 characters'],
     unique:true,
-    trim: true
+    trim: true,
+    // validate:[validator.isAlpha,'Tour name must only contain letters']
   },
   slug:String,
   duration:{
@@ -22,11 +24,17 @@ const tourSchema=new mongoose.Schema({
   },
   difficulty:{
     type:String,
-    required:[true,'A tour must have a difficulty']
+    required:[true,'A tour must have a difficulty'],
+    enum: {
+      values:['easy', 'medium', 'difficult'],
+      message:'Difficulty can be either easy, medium or difficult'
+    }
   },
   ratingsAverage:{
     type:Number,
     default:4.5,
+    min:[1,'Rating must not be less than 1'],
+    max:[5,'Rating must not be more than 5']
 
   },
   ratingQuantity:{
@@ -37,7 +45,15 @@ const tourSchema=new mongoose.Schema({
     type:Number,
     required:true
   },
-  priceDiscount:Number,
+  priceDiscount:{
+    type:Number,
+    validate:{
+      validator:function(val) {
+        return val < this.price;
+      },
+      message: 'Discount price ({VALUE}) should be below regular price'
+     }
+  },
   summary:{
     type:String,
     trim:true,
@@ -57,7 +73,11 @@ const tourSchema=new mongoose.Schema({
     default:Date.now(),
     select:false,
   },
-  startDates:[Date]
+  startDates:[Date],
+  secretTour:{
+    type:Boolean,
+    default:false,
+  }
 },{
   toJSON:{virtuals:true},
   toObject:{virtuals:true}
@@ -70,16 +90,36 @@ tourSchema.pre('save',function(next) {
   this.slug=slugify(this.name,{lower:true})
   next();
 })
+
+//QUERY MIDDLEWARE
+tourSchema.pre(/^find/,function(next) {
+// tourSchema.pre('find',function(next) {
+  this.find({secretTour:{$ne:true}})
+  next();
+})
+// tourSchema.post(/^find/,function(docs,next) {
+// // tourSchema.pre('find',function(next) {
+//   docs.find({secretTour:{$ne:true}})
+//   next();
+// })
+
+//AGGREGATION MIDDLEWARE
+tourSchema.pre('aggregate',function(next) {
+  this.pipeline().unshift({$match:{secretTour:{$ne:true}}})
+  console.log(this.pipeline());
+  next();
+})
+
 const Tour=mongoose.model('Tour',tourSchema);
 
 const validate=tour=>{
   const schema=Joi.object({
-    name:Joi.string().min(3).max(30).required(),
+    name:Joi.string().min(10).max(40).required(),
     slug:Joi.string(),
     duration:Joi.number().required(),
     maxGroupSize:Joi.number().required(),
-    difficulty:Joi.string().required(),
-    ratingsAverage:Joi.number(),
+    difficulty:Joi.string().required().valid('easy', 'medium', 'difficult'),
+    ratingsAverage:Joi.number().min(1).max(5),
     ratingsQuantity:Joi.number(),
     price:Joi.number().required(),
     priceDiscount:Joi.number(),
@@ -89,6 +129,7 @@ const validate=tour=>{
     images:Joi.array().items(Joi.string()),
     createdAt:Joi.date(),
     startDates:Joi.array().items(Joi.date()),
+    secretTour:Joi.boolean()
 
   })
 
