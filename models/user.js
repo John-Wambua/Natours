@@ -1,8 +1,11 @@
+const crypto=require('crypto');
 const mongoose =require('mongoose');
 const validator=require('validator');
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
+const _=require('lodash')
 const saltRounds=10;
+const catchAsync =require('../utils/catchAsync')
 
 const userSchema=new mongoose.Schema({
   name:{
@@ -45,7 +48,17 @@ const userSchema=new mongoose.Schema({
 
   },
   passwordChangedAt:Date,
+  passwordResetToken:String,
+  passwordResetExpires:Date,
 });
+
+userSchema.pre('save',function(next) {
+  if (!this.isModified('password'|| this.isNew)) return next();
+
+  this.passwordChangedAt=Date.now()-1000;
+  next();
+
+})
 
 userSchema.pre('save',async function(next) {
   //Only run if password was modified
@@ -59,18 +72,27 @@ userSchema.pre('save',async function(next) {
   }catch (e) {
     next(e)
   }
+
 })
 //INSTANCE METHOD
 userSchema.methods.correctPassword=async function(candidatePassword,next) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   }catch (e) {
-    return next(e);
+    next(e)
   }
+
+
 }
-userSchema.methods.generateAuthToken=function() {
+userSchema.methods.generateAuthToken=function(statusCode,res) {
   const token=jwt.sign({id:this._id},process.env.JWT_SECRET,{expiresIn:process.env.JWT_EXP});
-  return token;
+  return res.status(statusCode).json({
+    status:'success',
+    token,
+    data:{
+      user:_.pick(this,['_id','name','email','role'])
+    }
+  });
 }
 userSchema.methods.changedPasswordAfter=function(JWTTimestamp) {
   if (this.passwordChangedAt){
@@ -79,6 +101,16 @@ userSchema.methods.changedPasswordAfter=function(JWTTimestamp) {
     return JWTTimestamp<changedTimestamp;//if true, password was changed
   }
   return false;
+}
+userSchema.methods.createPasswordResetToken=function() {
+  const resetToken=crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken=crypto.createHash('sha256').update(resetToken).digest('hex');
+  this.passwordResetExpires=Date.now() + 10*60*1000;
+
+  console.log({ resetToken }, this.passwordResetToken);
+  return resetToken;
+
 }
 const User =mongoose.model('User',userSchema);
 
