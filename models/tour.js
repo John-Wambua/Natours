@@ -97,11 +97,6 @@ tourSchema.pre(/^find/,function(next) {
   this.find({secretTour:{$ne:true}})
   next();
 })
-// tourSchema.post(/^find/,function(docs,next) {
-// // tourSchema.pre('find',function(next) {
-//   docs.find({secretTour:{$ne:true}})
-//   next();
-// })
 
 //AGGREGATION MIDDLEWARE
 tourSchema.pre('aggregate',function(next) {
@@ -109,6 +104,7 @@ tourSchema.pre('aggregate',function(next) {
   console.log(this.pipeline());
   next();
 })
+
 
 const Tour=mongoose.model('Tour',tourSchema);
 

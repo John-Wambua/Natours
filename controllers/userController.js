@@ -1,3 +1,5 @@
+const User=require('../models/user')
+
 exports.getAllUsers=(req,res)=>{
   res.status(200).json({
     status:"success",
@@ -7,12 +9,7 @@ exports.getAllUsers=(req,res)=>{
   })
 };
 exports.createUser=(req,res)=>{
-  res.status(200).json({
-    status:"Success",
-    data:{
-      action:'post tour'
-    }
-  });
+
 };
 exports.getUser=(req,res)=>{
   res.send('Get single tour');

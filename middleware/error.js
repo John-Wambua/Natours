@@ -17,6 +17,9 @@ const handleNotFoundError=err=>{
   const message=err.message;
   return new AppError(message,404);
 }
+const handleJWTError=()=>new AppError('Invalid token. Please log in again.',401);
+
+const handleJWTExpError=()=>new AppError('Your token is expired. Please log in again.',401);
 
 const sendErrorDev=(err,res)=>{
   res.status(err.statusCode).json({
@@ -57,17 +60,15 @@ module.exports=(err,req,res,next)=>{
     sendErrorDev(err,res)
   }else if (process.env.NODE_ENV==='production'){
     let error={...err}
-    console.log('THE ERROOOOOR kind!',error.kind);
     //Invalid ID
     if (error.kind==='ObjectId') error=handleCastErrorDb(error)
-    console.log('THE ERROOOOOR code!',error.code);
     //Duplicate name fields
     if (error.code===11000) error=handleDuplicateFieldsDb(error)
-    // console.log('ERRROOOR',error.details[0]);
     //Validation errors
     if (error.hasOwnProperty('_original')) error=handleValidationErrorDB(error)
-    console.log('THE ERROOOOOR',error)
     if (error.message==='No tour found with that ID') error=handleNotFoundError(error)
+    if (error.name==='JsonWebTokenError') error=handleJWTError()
+    if (error.name==='TokenExpiredError') error=handleJWTExpError()
     /*Todo add not found errors in production*/
     sendErrorProd(error,res)
   }
