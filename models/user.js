@@ -50,6 +50,11 @@ const userSchema=new mongoose.Schema({
   passwordChangedAt:Date,
   passwordResetToken:String,
   passwordResetExpires:Date,
+  active:{
+    type:Boolean,
+    default: true,
+    select:false
+  }
 });
 
 userSchema.pre('save',function(next) {
@@ -74,6 +79,13 @@ userSchema.pre('save',async function(next) {
   }
 
 })
+//Query MIDDLEWARE
+userSchema.pre(/^find/,function(next) {
+  //this points to current query
+  this.find({active: { $ne:false }})
+  next();
+})
+
 //INSTANCE METHOD
 userSchema.methods.correctPassword=async function(candidatePassword,next) {
   try {
@@ -81,7 +93,6 @@ userSchema.methods.correctPassword=async function(candidatePassword,next) {
   }catch (e) {
     next(e)
   }
-
 
 }
 userSchema.methods.generateAuthToken=function(statusCode,res) {
