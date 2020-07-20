@@ -1,6 +1,7 @@
 const Review=require('../models/review')
 const _=require('lodash')
 const catchAsync=require('../utils/catchAsync')
+const {deleteOne}=require('../controllers/handlerFactory')
 
 exports.getAllReviews=catchAsync(async (req,res,next)=>{
   let filter={}
@@ -25,3 +26,4 @@ exports.createReview=catchAsync(async (req,res,next)=>{
     }
   })
 })
+exports.deleteReview=deleteOne(Review,'review');

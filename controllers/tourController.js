@@ -2,6 +2,7 @@ const Tour=require('../models/tour');
 const APIFeatures=require('../utils/apiFeatures')
 const AppError=require('../utils/appError')
 const catchAsync=require('../utils/catchAsync')
+const {deleteOne}=require('../controllers/handlerFactory')
 
 exports.getAllTours=(req,res,next)=>{
 
@@ -69,18 +70,16 @@ exports.updateTour=(req,res,next)=>{
     })
   })
 };
-exports.deleteTour=(req,res,next)=>{
-  const tourId=req.params.id;
-  Tour.findByIdAndDelete(tourId,(err,tour)=>{
-    if (err) return  next(err)
-    if (!tour) return next(new AppError(new Error('No tour found with that ID'),404));
-
-    res.status(204).json({
-      status:"success",
-      data:null
-    })
-  })
-}
+exports.deleteTour=deleteOne(Tour,'tour')
+// exports.deleteTour=catchAsync(async (req,res,next)=>{
+//   const tourId=req.params.id;
+//   const tour=Tour.findByIdAndDelete(tourId)
+//     if (!tour) return next(new AppError(new Error('No tour found with that ID'),404));
+//     res.status(204).json({
+//       status:"success",
+//       data:null
+//     })
+// });
 
 exports.getTourStats=(req,res,next)=>{
   Tour.aggregate([

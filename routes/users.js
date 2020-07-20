@@ -1,8 +1,9 @@
 const express=require('express');
 const router=express.Router();
-const {getAllUsers,updateMe,deleteMe}=require('../controllers/userController');
+const {getAllUsers,updateMe,deleteMe,deleteUser}=require('../controllers/userController');
 const {sigup,login,forgotPassword,resetPassword,updatePassword,}=require('../controllers/authController');
 const auth=require('../middleware/auth')
+const {restrictTo}=require('../middleware/authorize')
 
 
 router.post('/signup',sigup)
@@ -20,10 +21,10 @@ router
   .get(getAllUsers);
   // .post(createUser);
 
-// router
-//   .route('/:id')
-//   // .get(getUser)
-//   .patch(updateUser)
-//   // .delete(deleteUser);
+router
+  .route('/:id')
+  // .get(getUser)
+  // .patch(updateUser)
+  .delete(auth,restrictTo('admin'),deleteUser);
 
 module.exports=router;

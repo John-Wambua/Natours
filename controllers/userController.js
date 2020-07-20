@@ -1,7 +1,8 @@
 const User=require('../models/user');
 const catchAsync=require('../utils/catchAsync');
 const _=require('lodash');
-const AppError=require('../utils/appError')
+const AppError=require('../utils/appError');
+const {deleteOne}=require('../controllers/handlerFactory')
 
 
 const filterObj=(obj,...allowedFields)=>{
@@ -18,7 +19,6 @@ exports.getAllUsers=catchAsync(async (req,res)=>{
   res.status(200).json({
     status:"success",
     data:{
-
       users:_.map(users, _.partialRight(_.pick, ['_id', 'name', 'email', 'role','passwordChangedAt']))
     },
   })
@@ -57,7 +57,4 @@ exports.getUser=(req,res)=>{
 exports.updateUser=(req,res)=>{
   res.send('Update tour');
 };
-exports.deleteUser =(req,res)=>{
-  res.send('delete tour');
-}
-
+exports.deleteUser =deleteOne(User,'user');
