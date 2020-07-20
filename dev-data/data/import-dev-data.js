@@ -1,7 +1,7 @@
 const fs=require('fs');
 const mongoose=require('mongoose')
 require('dotenv').config();
-const { Tour }=require('./../../models/tour')
+const Tour=require('./../../models/tour')
 
 mongoose.connect(process.env.MONGO_URI,{
   useNewUrlParser:true,
@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGO_URI,{
 })
 
 //READ FILE
-const tours=JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`,'utf-8'));
+const tours=JSON.parse(fs.readFileSync(`${__dirname}\\tours.json`,'utf-8'));
 
 //IMPORT DATA INTO DB
 
@@ -38,4 +38,5 @@ const deleteData=async ()=>{
     console.log(e);
   }
 }
-deleteData();
+// deleteData();
+// importData();

@@ -10,6 +10,7 @@ const AppError=require('./utils/appError')
 const globalErrorHandler=require('./middleware/error');
 const tours=require('./routes/tours')
 const users=require('./routes/users')
+const reviews=require('./routes/reviews')
 
 const app=express();
 
@@ -36,6 +37,7 @@ app.use("/api/", apiLimiter);
 app.use(express.static(`${__dirname}/public`));
 //Body-parsing
 app.use(express.urlencoded({extended:true,limit:'10kb'}))
+app.use(express.json())
 //Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
@@ -53,6 +55,7 @@ app.use(hpp({
 //ROUTES
 app.use('/api/v1/tours',tours);
 app.use('/api/v1/users',users);
+app.use('/api/v1/reviews',reviews);
 
 app.all('*',(req,res,next)=>{
 

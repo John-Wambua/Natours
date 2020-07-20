@@ -1,7 +1,7 @@
-const { Tour ,validate}=require('../models/tour');
+const Tour=require('../models/tour');
 const APIFeatures=require('../utils/apiFeatures')
 const AppError=require('../utils/appError')
-
+const catchAsync=require('../utils/catchAsync')
 
 exports.getAllTours=(req,res,next)=>{
 
@@ -28,10 +28,6 @@ exports.getAllTours=(req,res,next)=>{
 };
 
 exports.createTour=(req,res,next)=>{
-  
-  const {error}=validate(req.body);
-
-  if (error) return next(error);
 
   Tour.create(req.body,(err,result)=>{
     if (err) return next(err)
@@ -45,27 +41,22 @@ exports.createTour=(req,res,next)=>{
 
 
 };
-exports.getTour=(req,res,next)=>{
+exports.getTour=catchAsync(async (req,res,next)=>{
   const tourId=req.params.id;
 
-  Tour.findById(tourId,(err,tour)=>{
-    if (err) return next(err);
+  const tour=await Tour.findById(tourId).populate('reviews');
+
     if (!tour) return next(new AppError(new Error('No tour found with that ID'),404));
-    res.json({
+    res.status(200).json({
       status:"Success",
       data:{
         tour
       }
-    })
-  })
-};
+    });
+
+});
 exports.updateTour=(req,res,next)=>{
   const tourId=req.params.id;
-
-  const {error}=validate(req.body);
-
-  if (error)  return next(error);
-
 
   Tour.findByIdAndUpdate(tourId,req.body,{new:true,useFindAndModify:false,runValidators:true},(err,result)=>{
     if (err) return next(err);
