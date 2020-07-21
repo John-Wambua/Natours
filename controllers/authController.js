@@ -19,23 +19,20 @@ exports.sigup=(req,res,next)=>{
 
   })
 }
-exports.login= (req,res,next)=>{
+exports.login= catchAsync(async (req,res,next)=>{
   const { email,password }=req.body;
 
   //1) Check if email and password exist
   if(!email||!password) return next(new AppError(new Error('Please provide email and password'),400))
 
   //2) check if user exists && password exists
-  User.findOne({email},async (err,user)=>{
-    if (err) return next(err)
-
-    if (!user||!await user.correctPassword(password,next)) return next(new AppError(new Error('Incorrect email or password'),401));
+  const user= await User.findOne({email}).select('+password')
+    if (!user||!await user.correctPassword(password,user.password,next)) return next(new AppError(new Error('Incorrect email or password'),401));
     //3) send token to user
     user.generateAuthToken(200,res);
 
-  })
 
-}
+});
 
 exports.forgotPassword=catchAsync(async (req,res,next)=>{
   // 1) Get user based on posted email.
@@ -96,7 +93,7 @@ exports.updatePassword=catchAsync(async (req,res,next)=>{
   if (!req.user) return next(new AppError(new Error('You are not logged in'),401));
   const user=req.user;
   // 2) Check if posted password is correct
-  if (!await user.correctPassword(req.body.password,next)) return next(new AppError(new Error('Incorrect Password!'),401));
+  if (!await user.correctPassword(req.body.password,user.password,next)) return next(new AppError(new Error('Incorrect Password!'),401));
 
   // 3) Update password
   user.password=req.body.newPassword;

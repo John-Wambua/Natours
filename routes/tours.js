@@ -3,25 +3,30 @@ const router=express.Router();
 const auth=require('../middleware/auth')
 const { restrictTo }=require('../middleware/authorize');
 
-const { getAllTours,createTour,getTour,updateTour,deleteTour,getTourStats,getMonthlyPlan }=require('../controllers/tourController')
+const { getAllTours,createTour,getTour,updateTour,deleteTour,getTourStats,getMonthlyPlan,getToursWithin,getDistances }=require('../controllers/tourController')
 const reviewRouter=require('../routes/reviews')
 
 
 
 router.route('/tour-stats').get(getTourStats)
-router.route('/monthly-plan/:year').get(getMonthlyPlan)
+router.route('/monthly-plan/:year').get(auth,
+  restrictTo('admin','lead-guide','guide'),getMonthlyPlan)
 router
   .route('/top-5-cheap')
   .get(getAllTours);
+
+router.route('/tours-within/:distance/center/:latlng/unit/:unit').get(getToursWithin)
+router.route('/distances/:latlng/unit/:unit').get(getDistances)
+
 router
   .route('/')
-  .get(auth,getAllTours)
-  .post(createTour);
+  .get(getAllTours)
+  .post(auth,restrictTo('lead-guide','admin'),createTour);
 
 router
   .route('/:id')
   .get(getTour)
-  .patch(updateTour)
+  .patch(auth,restrictTo('admin','lead-guide'),updateTour)
   .delete(auth,
    restrictTo('admin','lead-guide'),
     deleteTour)

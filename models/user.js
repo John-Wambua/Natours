@@ -34,6 +34,7 @@ const userSchema=new mongoose.Schema({
     required:[true,'Please provide a password'],
     minlength:8,
     maxlength:255,
+    select: false
   },
   passwordConfirm:{
     type:String,
@@ -87,9 +88,9 @@ userSchema.pre(/^find/,function(next) {
 })
 
 //INSTANCE METHOD
-userSchema.methods.correctPassword=async function(candidatePassword,next) {
+userSchema.methods.correctPassword=async function(candidatePassword,dbPassword,next) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    return await bcrypt.compare(candidatePassword, dbPassword);
   }catch (e) {
     next(e)
   }
