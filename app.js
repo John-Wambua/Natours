@@ -1,3 +1,4 @@
+const path=require('path');
 const express=require('express');
 const morgan=require('morgan');
 const rateLimit=require('express-rate-limit');
@@ -11,11 +12,14 @@ const globalErrorHandler=require('./middleware/error');
 const tours=require('./routes/tours')
 const users=require('./routes/users')
 const reviews=require('./routes/reviews')
+const views=require('./routes/views')
 
 const app=express();
 
-
+app.set('view engine','pug')
+app.set('views',path.join(__dirname,'views'))
 //MIDDLEWARE
+app.use(express.static(path.join(__dirname,'public')));
 //Set HTTP security headers
 app.use(helmet());
 
@@ -34,7 +38,7 @@ const apiLimiter = rateLimit({
 // only apply to requests that begin with /api/
 app.use("/api/", apiLimiter);
 
-app.use(express.static(`${__dirname}/public`));
+
 //Body-parsing
 app.use(express.urlencoded({extended:true,limit:'10kb'}))
 app.use(express.json())
@@ -53,6 +57,7 @@ app.use(hpp({
 
 
 //ROUTES
+app.use('/',views);
 app.use('/api/v1/tours',tours);
 app.use('/api/v1/users',users);
 app.use('/api/v1/reviews',reviews);
