@@ -1,13 +1,14 @@
 const express=require('express');
 const router=express.Router();
 const {getAllUsers,updateMe,deleteMe,deleteUser,updateUser,getUser,getMe}=require('../controllers/userController');
-const {sigup,login,forgotPassword,resetPassword,updatePassword,}=require('../controllers/authController');
-const auth=require('../middleware/auth')
+const {sigup,login,forgotPassword,resetPassword,updatePassword,logout}=require('../controllers/authController');
+const { auth }=require('../middleware/auth')
 const {restrictTo}=require('../middleware/authorize')
 
 
 router.post('/signup',sigup)
 router.post('/login',login)
+router.get('/logout',logout)
 
 router.post('/forgotPassword',forgotPassword)
 router.patch('/resetPassword/:token',resetPassword)

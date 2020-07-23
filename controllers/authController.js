@@ -88,12 +88,22 @@ exports.resetPassword=catchAsync(async (req,res,next)=>{
   user.generateAuthToken(200,res);
 
 })
+
+exports.logout=(req,res)=>{
+  res.cookie('jwt','logged out',{
+    expires: new Date(Date.now() +10*1000),
+    httpOnly:true
+  });
+  res.status(200).json({status:'success'})
+}
+
 exports.updatePassword=catchAsync(async (req,res,next)=>{
   // 1) Get User
-  if (!req.user) return next(new AppError(new Error('You are not logged in'),401));
-  const user=req.user;
+  if (!req.user) return next(new AppError('You are not logged in',401));
+  const user=await User.findById(req.user._id).select('+password');
   // 2) Check if posted password is correct
-  if (!await user.correctPassword(req.body.password,user.password,next)) return next(new AppError(new Error('Incorrect Password!'),401));
+  console.log(user);
+  if (!await user.correctPassword(req.body.password,user.password,next)) return next(new AppError('Incorrect Password!',401));
 
   // 3) Update password
   user.password=req.body.newPassword;

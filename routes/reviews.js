@@ -1,6 +1,6 @@
 const express=require('express')
 const {getAllReviews,getReview,createReview,updateReview,deleteReview}=require('../controllers/reviewsController')
-const auth=require('../middleware/auth');
+const { auth }=require('../middleware/auth');
 const {restrictTo}=require('../middleware/authorize');
 
 const router=express.Router({mergeParams: true});

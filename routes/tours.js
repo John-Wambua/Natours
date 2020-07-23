@@ -1,6 +1,6 @@
 const express=require('express')
 const router=express.Router();
-const auth=require('../middleware/auth')
+const { auth }=require('../middleware/auth')
 const { restrictTo }=require('../middleware/authorize');
 
 const { getAllTours,createTour,getTour,updateTour,deleteTour,getTourStats,getMonthlyPlan,getToursWithin,getDistances }=require('../controllers/tourController')
