@@ -2,23 +2,24 @@ const User=require('../models/user');
 const AppError=require('../utils/appError');
 const _=require('lodash');
 const catchAsync=require('../utils/catchAsync');
-const sendEmail=require('../utils/email');
+const Email=require('../utils/email');
 const crypto=require('crypto');
 
-exports.sigup=(req,res,next)=>{
-  User.create({
+
+exports.sigup=catchAsync(async (req,res,next)=>{
+  const user =await User.create({
     name:req.body.name,
     email:req.body.email,
     password:req.body.password,
     passwordConfirm:req.body.passwordConfirm,
     passwordChangedAt:req.body.passwordChangedAt,
-  },(err,user)=>{
-    if (err) return next(err)
-   user.generateAuthToken(201,res);
+  });
+  const url=`${req.protocol}://${req.get('host')}/me`;
+  console.log(url);
+  await new Email(user,url).sendWelcome()
+  user.generateAuthToken(201,res);
 
-
-  })
-}
+})
 exports.login= catchAsync(async (req,res,next)=>{
   const { email,password }=req.body;
 
@@ -45,15 +46,10 @@ exports.forgotPassword=catchAsync(async (req,res,next)=>{
   await user.save({validateBeforeSave:false})
 
   // 3) Send it to user's email
-  const resetURL=`${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
-  const message=`Forgot your password? No problem, simply reset it at ${resetURL}.\nIf you did not initiate this process, please ignore this email.`;
 
   try {
-    await sendEmail({
-      email:user.email,
-      subject:"Your password reset token (Valid for 10 minutes)",
-      message:message
-    });
+    const resetURL=`${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+    await new Email(user,resetURL).sendPasswordReset();
     res.status(200).json({
       status:'success',
       message:'Token sent to email'
