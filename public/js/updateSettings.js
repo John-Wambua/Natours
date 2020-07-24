@@ -11,6 +11,6 @@ export const updateSettings=async (data,type)=>{
     }
 
   }catch (e) {
-    showAlert('error',e.response.data.message)
+    showAlert('error',e.data.message)
   }
 }

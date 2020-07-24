@@ -14,6 +14,7 @@ const tours=require('./routes/tours')
 const users=require('./routes/users')
 const reviews=require('./routes/reviews')
 const views=require('./routes/views')
+const bookings=require('./routes/bookings')
 
 const app=express();
 
@@ -69,6 +70,7 @@ app.use('/',views);
 app.use('/api/v1/tours',tours);
 app.use('/api/v1/users',users);
 app.use('/api/v1/reviews',reviews);
+app.use('/api/v1/bookings',bookings);
 
 app.all('*',(req,res,next)=>{
 
