@@ -31,10 +31,13 @@ if (logoutBtn) logoutBtn.addEventListener('click',logout)
 if (userDataForm){
   userDataForm.addEventListener('submit',e=>{
     e.preventDefault();
-    const name=document.querySelector('#name_acc').value;
-    const email=document.querySelector('#email_acc').value;
+    const form=new FormData();
+    form.append('name',document.querySelector('#name_acc').value)
+    form.append('email',document.querySelector('#email_acc').value)
+    form.append('photo',document.querySelector('#photo').files[0])
+    console.log(form);
 
-    updateSettings({ name, email },'data')
+    updateSettings(form,'data')
 
   })
 }

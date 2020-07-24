@@ -32,13 +32,15 @@ block content
                     form.form.form-user-data
                         .form__group
                             label.form__label(for='name_acc') Name
-                            input#name_acc.form__input(type='text', value=`${user.name}`, required)
+                            input#name_acc.form__input(type='text', value=`${user.name}`, name='name',required)
                         .form__group.ma-bt-md
                             label.form__label(for='email_acc') Email address
-                            input#email_acc.form__input(type='email', value=`${user.email}`, required)
+                            input#email_acc.form__input(type='email', value=`${user.email}`, name='email',required)
                         .form__group.form__photo-upload
                             img.form__user-photo(src=`img/users/${user.photo}`, alt='User photo')
-                            a.btn-text(href='') Choose new photo
+
+                            input.form__upload(type='file',accept='image/*',id='photo',name='photo')
+                            label(for='photo') Choose new Photo
                         .form__group.right
                             button.btn.btn--small.btn--green Save settings
                 .line &nbsp;

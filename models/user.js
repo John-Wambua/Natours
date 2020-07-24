@@ -27,7 +27,8 @@ const userSchema=new mongoose.Schema({
     default:'user'
   },
   photo:{
-    type:String
+    type:String,
+    default:'default.jpg'
   },
   password:{
     type:String,
@@ -108,7 +109,8 @@ userSchema.methods.generateAuthToken=function(statusCode,res) {
     status:'success',
     token,
     data:{
-      user:_.pick(this,['_id','name','email','role'])
+      user:_.pick(this,['_id','name','email','photo','role'])
+
     }
   });
 }

@@ -23,11 +23,11 @@ exports.login= catchAsync(async (req,res,next)=>{
   const { email,password }=req.body;
 
   //1) Check if email and password exist
-  if(!email||!password) return next(new AppError(new Error('Please provide email and password'),400))
+  if(!email||!password) return next(new AppError('Please provide email and password',400))
 
   //2) check if user exists && password exists
   const user= await User.findOne({email}).select('+password')
-    if (!user||!await user.correctPassword(password,user.password,next)) return next(new AppError(new Error('Incorrect email or password'),401));
+    if (!user||!await user.correctPassword(password,user.password,next)) return next(new AppError('Incorrect email or password',401));
     //3) send token to user
     user.generateAuthToken(200,res);
 
@@ -38,7 +38,7 @@ exports.forgotPassword=catchAsync(async (req,res,next)=>{
   // 1) Get user based on posted email.
   const user=await User.findOne({email:req.body.email})
 
-  if (!user) return next(new AppError(new Error('There is no user with the specified email address'),404));
+  if (!user) return next(new AppError('There is no user with the specified email address',404));
 
   // 2) Generate the random reset token
   const resetToken=user.createPasswordResetToken();
@@ -63,7 +63,7 @@ exports.forgotPassword=catchAsync(async (req,res,next)=>{
     user.passwordResetExpires=undefined;
 
     await user.save({validateBeforeSave:true});
-    return next(new AppError(new Error('There was an error sending the email.Try again later!'),500));
+    return next(new AppError('There was an error sending the email.Try again later!',500));
   }
 
 

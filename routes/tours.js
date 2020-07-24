@@ -3,7 +3,7 @@ const router=express.Router();
 const { auth }=require('../middleware/auth')
 const { restrictTo }=require('../middleware/authorize');
 
-const { getAllTours,createTour,getTour,updateTour,deleteTour,getTourStats,getMonthlyPlan,getToursWithin,getDistances }=require('../controllers/tourController')
+const {resizeTourImages, getAllTours,createTour,getTour,updateTour,deleteTour,getTourStats,getMonthlyPlan,getToursWithin,getDistances,uploadTourImages }=require('../controllers/tourController')
 const reviewRouter=require('../routes/reviews')
 
 
@@ -26,7 +26,12 @@ router
 router
   .route('/:id')
   .get(getTour)
-  .patch(auth,restrictTo('admin','lead-guide'),updateTour)
+  .patch(
+    auth,
+    restrictTo('admin','lead-guide'),
+    uploadTourImages,
+    resizeTourImages,
+    updateTour)
   .delete(auth,
    restrictTo('admin','lead-guide'),
     deleteTour)
