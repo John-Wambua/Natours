@@ -6,7 +6,7 @@ const Email=require('../utils/email');
 const crypto=require('crypto');
 
 
-exports.sigup=catchAsync(async (req,res,next)=>{
+exports.signup=catchAsync(async (req,res,next)=>{
   const user =await User.create({
     name:req.body.name,
     email:req.body.email,
@@ -17,7 +17,7 @@ exports.sigup=catchAsync(async (req,res,next)=>{
   const url=`${req.protocol}://${req.get('host')}/me`;
   console.log(url);
   await new Email(user,url).sendWelcome()
-  user.generateAuthToken(201,res);
+  user.generateAuthToken(201,res,req);
 
 })
 exports.login= catchAsync(async (req,res,next)=>{
@@ -30,7 +30,7 @@ exports.login= catchAsync(async (req,res,next)=>{
   const user= await User.findOne({email}).select('+password')
     if (!user||!await user.correctPassword(password,user.password,next)) return next(new AppError('Incorrect email or password',401));
     //3) send token to user
-    user.generateAuthToken(200,res);
+    user.generateAuthToken(200,res,req);
 
 
 });
@@ -81,7 +81,7 @@ exports.resetPassword=catchAsync(async (req,res,next)=>{
   //3) Update changedPasswordAt property for the user
 
   //4) Log user in, send JWT
-  user.generateAuthToken(200,res);
+  user.generateAuthToken(200,res,req);
 
 })
 
@@ -106,6 +106,6 @@ exports.updatePassword=catchAsync(async (req,res,next)=>{
   user.passwordConfirm=req.body.newPasswordConfirm;
   await user.save()
   // 4) Log in user.
-  user.generateAuthToken(200,res);
+  user.generateAuthToken(200,res,req);
 
 })

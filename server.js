@@ -14,6 +14,8 @@ process.on('unhandledRejection',err=>{
   process.exit(1)
 
 })
+
+
 const app=require('./app')
 
 mongoose.connect(process.env.MONGO_URI,{
@@ -27,9 +29,18 @@ mongoose.connect(process.env.MONGO_URI,{
 })
 
 const port=process.env.PORT || 3000;
-app.listen(port,()=>{
+const server = app.listen(port,()=>{
   console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${port}...`);
 });
+
+//Respond to Heroku Sigterm signals
+process.on('SIGTERM', ()=>{
+  console.log('SIGTERM RECEIVED. Shutting down...');
+  //Allow all pending requests to function till the end
+  server.close(()=>{
+    console.log('Process Terminated');
+  })
+})
 
 
 

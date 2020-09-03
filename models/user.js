@@ -96,14 +96,15 @@ userSchema.methods.correctPassword=async function(candidatePassword,dbPassword,n
   }
 
 }
-userSchema.methods.generateAuthToken=function(statusCode,res) {
+userSchema.methods.generateAuthToken=function(statusCode,res,req) {
   const token=jwt.sign({id:this._id},process.env.JWT_SECRET,{expiresIn:process.env.JWT_EXP});
-  const cookieOptions={
+
+  res.cookie('jwt',token,{
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN *24 *60*60*1000),
-    httpOnly:true
-  }
-  if (process.env.NODE_ENV==='production') cookieOptions.secure=true;
-  res.cookie('jwt',token,cookieOptions);
+    httpOnly:true,
+    //Test if app is secure
+    secure: req.secure || req.headers('x-forwarded-proto')==='https'
+  });
   return res.status(statusCode).json({
     status:'success',
     token,

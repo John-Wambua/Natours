@@ -19,6 +19,9 @@ const bookings=require('./routes/bookings')
 
 const app=express();
 
+//Enable proxy
+app.enable('trust proxy')
+
 app.set('view engine','pug')
 app.set('views',path.join(__dirname,'views'))
 //MIDDLEWARE
