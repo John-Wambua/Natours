@@ -4,7 +4,7 @@ import { showAlert } from './alerts';
 //type is either 'password' or 'data'
 export const updateSettings=async (data,type)=>{
   try {
-    const url=type==='password'? 'http://localhost:3000/api/v1/users/updateMyPassword':'http://localhost:3000/api/v1/users/updateMe';
+    const url=type==='password'? '/api/v1/users/updateMyPassword':'/api/v1/users/updateMe';
     const response = await axios.patch(url, data)
     if (response.data.status==='success'){
       showAlert('success',`${type.toUpperCase()} updated successfully`)

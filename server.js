@@ -4,13 +4,13 @@ require('dotenv').config();
 
 process.on('uncaughtException',err=>{
   console.log('Uncaught Exception...📌');
-  console.log(err.name,err.message);
+  console.log(err);
     process.exit(1)
 
 })
 process.on('unhandledRejection',err=>{
   console.log(' unhandled Promise Rejection...📌');
-  console.log(err.name,err.message);
+  console.log(err);
   process.exit(1)
 
 })
@@ -26,7 +26,7 @@ mongoose.connect(process.env.MONGO_URI,{
   console.log('Database Connected Successfully');
 })
 
-const port=3000;
+const port=process.env.PORT || 3000;
 app.listen(port,()=>{
   console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${port}...`);
 });

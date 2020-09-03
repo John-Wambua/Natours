@@ -4,7 +4,7 @@ export const login=async (email,password)=>{
   console.log(email,password);
   console.log('LOGIN');
   try {
-    const response = await axios.post('http://localhost:3000/api/v1/users/login', {
+    const response = await axios.post('/api/v1/users/login', {
       email,
       password
     })
@@ -24,7 +24,7 @@ export const login=async (email,password)=>{
 
 export const logout=async ()=>{
   try {
-    const response = await axios.get('http://localhost:3000/api/v1/users/logout')
+    const response = await axios.get('/api/v1/users/logout')
     if (response.data.status==='success') location.reload(true);
 
   }catch (e) {
