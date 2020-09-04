@@ -25,11 +25,11 @@ exports.getCheckoutSession=catchAsync(async (req,res,next)=>{
     cancel_url:`${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email:req.user.email,
     client_reference_id:req.params.tourID,
-    line_items:[
+    display_items:[
       {
         name:`${tour.name} Tour`,
         description:tour.summary,
-        images:[`https://www.natours.dev/img/tours/${tour.imageCover}`],
+        images:[`${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`],
         amount:tour.price * 100,
         currency:'usd',
         quantity:1
@@ -62,18 +62,18 @@ const createBookingCheckout = async session=>{
   await Booking.create({ tour, user, price })
 }
 
-exports.webhookCheckout = catchAsync(async (req,res,next) =>{
+exports.webhookCheckout = async (req,res,next) =>{
   const signature = req.headers['stripe-signature'];
 
   let event;
   try {
     event = stripe.webhooks.constructEvent(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET)
+
+    if (event.type ==='checkout.session.completed'){
+      await createBookingCheckout(event.data.object)
+      res.status(200).json({ received: true })
+    }
   }catch (e) {
     return res.status(400).send(`Webhook error: ${e.message}`)
   }
-
-  if (event.type ==='checkout.session.completed'){
-    await createBookingCheckout(event.data.object)
-    res.status(200).json({ received: true })
-  }
-})
+}
