@@ -9,6 +9,7 @@ const xss=require('xss-clean');
 const hpp=require('hpp');
 const cookieParser=require('cookie-parser')
 const cors = require('cors')
+const bodyParser =require('body-parser')
 
 const AppError=require('./utils/appError')
 const globalErrorHandler=require('./middleware/error');
@@ -17,6 +18,7 @@ const users=require('./routes/users')
 const reviews=require('./routes/reviews')
 const views=require('./routes/views')
 const bookings=require('./routes/bookings')
+const {webhookCheckout} =require('./controllers/bookingController')
 
 const app=express();
 //implement cors
@@ -55,6 +57,12 @@ const apiLimiter = rateLimit({
 // only apply to requests that begin with /api/
 app.use("/api/", apiLimiter);
 
+/**STRIPE WEBHOOK*/
+//We need the body to not be parsed to json
+app.post(
+  '/webhook-checkout',
+  bodyParser.raw({type: 'application/json'})
+  ,webhookCheckout)
 
 //Body-parsing
 app.use(express.urlencoded({extended:true,limit:'10kb'}))
